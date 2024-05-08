@@ -15,7 +15,7 @@ import java.sql.SQLException;
 public class ConexionFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
-       try(Connection con = ConexionBD_DSPool.getInstance().getConexionBD()){
+       try(Connection con = ConexionBD_DSPool.getConexionBD()){
            if(con.getAutoCommit()){ // Si la conexión está en modo autocommit, la desactivamos para poder hacer transacciones manuales
                 con.setAutoCommit(false);
            }

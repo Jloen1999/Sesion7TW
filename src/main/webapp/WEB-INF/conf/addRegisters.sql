@@ -19,18 +19,18 @@ VALUES
     (6, 'Carta de Luis');
 
 -- Insertar registros en la tabla Regalos
-INSERT INTO Regalos (id_carta, nombre_regalo)
+INSERT INTO Regalos (id_carta, nombre_regalo, cantidad)
 VALUES
-    (1, 'Libro Cien dias de soledad'),
-    (1, 'Tarjeta de regalo para una cena en un restaurante elegante'),
-    (2, 'Flores de temporada'),
-    (3, 'Caja de chocolates belgas'),
-    (4, 'Colgante de plata con forma de corazon'),
-    (5, 'album de fotos personalizado'),
-    (5, 'Juego de copas de cristal para vino'),
-    (5, 'Caja de bombones surtidos'),
-    (5, 'Vale de spa para un dia de relajacion'),
-    (5, 'Suscripcion anual a una revista de arte'),
-    (6, 'Caja de bombones surtidos'),
-    (6, 'Vale de spa para un dia de relajacion'),
-    (6, 'Suscripcion anual a una revista de arte');
+    (1, 'Libro Cien dias de soledad', 2),
+    (1, 'Tarjeta de regalo para una cena en un restaurante elegante', 1),
+    (2, 'Flores de temporada', 3),
+    (3, 'Caja de chocolates belgas', 1),
+    (4, 'Colgante de plata con forma de corazon', 1),
+    (5, 'album de fotos personalizado', 1),
+    (5, 'Juego de copas de cristal para vino', 1),
+    (5, 'Caja de bombones surtidos', 1),
+    (5, 'Vale de spa para un dia de relajacion', 1),
+    (5, 'Suscripcion anual a una revista de arte', 1),
+    (6, 'Caja de bombones surtidos', 1),
+    (6, 'Vale de spa para un dia de relajacion', 1),
+    (6, 'Suscripcion anual a una revista de arte', 1);

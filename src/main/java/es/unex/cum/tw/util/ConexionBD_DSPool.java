@@ -9,22 +9,7 @@ import java.sql.SQLException;
 
 public class ConexionBD_DSPool {
 
-    // Instancia única de la conexión
-    private static ConexionBD_DSPool instance = null;
-
-    // Método estático para obtener la instancia única
-    public static synchronized ConexionBD_DSPool getInstance() {
-        if (instance == null) {
-            instance = new ConexionBD_DSPool();
-        }
-        return instance;
-    }
-
-    // constructor privado para evitar instanciación externa
-    private ConexionBD_DSPool() {
-    }
-
-    public Connection getConexionBD() throws SQLException, NamingException {
+    public static Connection getConexionBD() throws SQLException, NamingException {
         Context initContext = new InitialContext();
         Context envContext = (Context) initContext.lookup("java:/comp/env");
         DataSource ds = (DataSource) envContext.lookup("jdbc/MysqlDB");

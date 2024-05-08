@@ -1,7 +1,9 @@
 package es.unex.cum.tw.controllers;
 
-import es.unex.cum.tw.services.LoginService;
-import es.unex.cum.tw.services.LoginServiceImpl;
+import es.unex.cum.tw.models.Carta;
+import es.unex.cum.tw.models.Regalo;
+import es.unex.cum.tw.models.User;
+import es.unex.cum.tw.services.*;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -12,17 +14,44 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
+import java.sql.Connection;
+import java.util.List;
+import java.util.Optional;
+import java.util.Properties;
 
 @WebServlet(name = "ListarServlet", value = "/carta/listar")
 public class ListarServlet extends HttpServlet {
+    private Properties props;
+    private String USERNAMEADMIN;
+    private String PASSWORDADMIN;
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        props = new Properties();
+        try {
+            props.load(getClass().getClassLoader().getResourceAsStream("config.properties"));
+            USERNAMEADMIN = props.getProperty("USERNAME");
+            PASSWORDADMIN = props.getProperty("PASSWORD");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("text/html; charset=UTF-8");
-        LoginService auth = new LoginServiceImpl();
-        boolean autenticado = auth.authenticate(request);
 
-        HttpSession s = request.getSession();
+        UserService userService = new UserServiceJDBCImpl((Connection) request.getAttribute("con"));
+        Optional<User> userOptional = userService.findById(Integer.parseInt(request.getParameter("userId")));
+
+        LoginService loginService = new LoginServiceImpl();
+        Optional<User> userLogin = loginService.authenticate(request);
+
+        CartaService cartaService = new CartaServiceJDBCImpl((Connection) request.getAttribute("con"));
+
+        HttpSession session = request.getSession();
+
+        Carta carta = (Carta) session.getAttribute("carta");
 
         try (PrintWriter print = response.getWriter()) {
 
@@ -40,23 +69,34 @@ public class ListarServlet extends HttpServlet {
             print.println("     <link href=\"https://fonts.googleapis.com/css?family=Playfair&#43;Display:700,900&amp;display=swap\" rel=\"stylesheet\">");
             print.println(" </head>");
             print.println("<body class=\"bg-dark\">");
-            if (autenticado) {
+            if (userOptional.isPresent()) {
 
-                print.println("<h1 class=\"text-white text-center display-1\">Reyes Magos</h1>");
+                print.println("<div class=\"col-md-3 d-flex justify-content-end ms-6\">");
+                print.println("<img class=\"\" src=\"../img/profile.svg\" alt=\"imagen de perfil del admin\" wi>");
+                // Mostrar nombre username
+                print.println("<p class=\"text-success\">" + userLogin.get().getUsername() + "</p>");
+                print.println("</div>");
+
+                carta = cartaService.findCartaByUser(userOptional.get()).orElse(carta);
+                session.setAttribute("carta", carta);
+
+                print.println("<h1 class=\"text-warning text-center display-1\">Reyes Magos</h1>");
 
                 print.println("<div class=\"row flex-nowrap justify-content-between align-items-center\">");
                 print.println("<header class=\"col-5\">");
                 print.println("<nav id=\"navbar-example3\" class=\"h-100 flex-column align-items-stretch pe-4 border-end\">");
                 print.println("<nav class=\"nav nav-pills flex-column\">");
-                print.println("<a class=\"nav-link\" href=\"/webapp-sesion7/\" data-bs-toggle=\"tooltip\"");
-                print.println("data-bs-title=\"Iniciar sesión de usuario\" data-bs-placement=\"left\">");
-                print.println("Inicio");
-                print.println("</a>");
-                print.println("<a class=\"nav-link\" href=\"/webapp-sesion7/action\" data-bs-toggle=\"tooltip\"");
+                if (userLogin.get().getUsername().equals(USERNAMEADMIN) && userLogin.get().getPassword().equals(PASSWORDADMIN)) {
+                    print.println("<a class=\"nav-link\" href=\"/webapp-sesion7/login\" data-bs-toggle=\"tooltip\"");
+                    print.println("data-bs-title=\"Página de administración\" data-bs-placement=\"left\">");
+                    print.println("Admin");
+                    print.println("</a>");
+                }
+                print.println("<a class=\"nav-link\" href=\"/webapp-sesion7/Introducir.html\" data-bs-toggle=\"tooltip\"");
                 print.println("data-bs-title=\"Añadir regalos a la carta de los reyes magos\" data-bs-placement=\"left\">");
                 print.println("Añadir regalos");
                 print.println("</a>");
-                print.println("<a class=\"nav-link\" href=\"/webapp-sesion7/action\" data-bs-toggle=\"tooltip\"");
+                print.println("<a class=\"nav-link\" href=\"/webapp-sesion7/logout\" data-bs-toggle=\"tooltip\"");
                 print.println("data-bs-title=\"Cerrar sesión de usuario\" data-bs-placement=\"left\">");
                 print.println("Cerrar sesión");
                 print.println("</a>");
@@ -71,27 +111,37 @@ public class ListarServlet extends HttpServlet {
                 print.println("<p class=\"lead my-3\">Aquí podrás ver los regalos y añadir nuevos regalos.</p>");
                 print.println("</div>");
                 print.println("<div class=\"col-md-6 img-thumbnail\">");
-                print.println("<img src=\"img/navidad-reyes-magos.webp\" alt=\"imagen de los tres reyes magos\">");
+                print.println("<img src=\"../img/navidad-reyes-magos.webp\" alt=\"imagen de los tres reyes magos\">");
                 print.println("</div>");
 
-                String username = (String) s.getAttribute("username");
-                ArrayList<String> regalos = (ArrayList<String>) s.getAttribute("regalos");
+                List<Regalo> regalos = cartaService.findRegalosByCarta(carta);
 
-                response.getWriter().println("<div class=\"dropdown col-md-10 d-flex justify-content-center align-items-center\">");
-                response.getWriter().println("<button class=\"btn btn-secondary dropdown-toggle\" type=\"button\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">");
-                response.getWriter().println("Regalos de " + username);
-                response.getWriter().println("</button>");
-                response.getWriter().println("<ul class=\"dropdown-menu\">");
-                for (String regalo : regalos) {
-                    response.getWriter().println("<li><a class=\"dropdown-item\" href=\"#\">" + regalo + "</a></li>");
+                print.println("<h2 class=\"text-warning text-center mt-4\">Carta del usuario " + userOptional.get().getUsername() + "</h2>");
+                /* add <form name="formcarro" action="${pageContext.request.contextPath}/carro/actualizar" method="post"> */
+                print.println("<form name=\"formCarta\" action=\"/webapp-sesion7/carta/actualizar\" method=\"post\">");
+                print.println("<table class=\"table table-hover table-striped\">");
+                print.println("<tr>");
+                print.println("<th>id</th>");
+                print.println("<th>nombre</th>");
+                print.println("<th>id_carta</th>");
+                print.println("<th>cantidad</th>");
+                print.println("<th>borrar</th>");
+                print.println("</tr>");
+                for (Regalo regalo : regalos) {
+                    print.println("<tr>");
+                    print.println("<td>" + regalo.getIdRegalo() + "</td>");
+                    print.println("<td>" + regalo.getNombre() + "</td>");
+                    print.println("<td>" + regalo.getIdCarta() + "</td>");
+                    print.println("<td><input type=\"number\" min=\"1\" max=\"100\" style=\"width: 40px\" name=\"cant_" + regalo.getIdRegalo() + "\" value=\"" + regalo.getCantidad() + "\"/></td>");
+                    print.println("<td><input type=\"checkbox\" value=\"" + regalo.getIdRegalo() + "\" name=\"regalosAEliminar\"/></td>");
+                    print.println("</tr>");
                 }
-                response.getWriter().println("</ul>");
-                response.getWriter().println("</div>");
-
-
+                print.println("</table>");
+                print.println("<a class=\"btn btn-primary\" href=\"javascript:document.formCarta.submit();\">Actualizar</a>");
+                print.println("</form>");
             } else {
                 response.getWriter().println("<p style=\"red\">No puedes listar regalos. Debes iniciar sesión</p>");
-                RequestDispatcher dispatcher = request.getRequestDispatcher("/Error.html");
+                RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/Error.html");
                 try {
                     dispatcher.include(request, response);
                 } catch (IOException | ServletException e) {

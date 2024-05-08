@@ -27,45 +27,50 @@ public class AnadirRegaloServlet extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("text/html");
 
-        PrintWriter print = response.getWriter();
-
-        Connection conn = (Connection) request.getAttribute("conn");
+        Connection conn = (Connection) request.getAttribute("con");
         CartaService cartaService = new CartaServiceJDBCImpl(conn);
         UserService userService = new UserServiceJDBCImpl(conn);
 
-        String nombreRegalo = request.getParameter("regalo");
-        if(nombreRegalo != null && !nombreRegalo.isEmpty()) {
-            HttpSession session = request.getSession();
-            Optional<User> userOptional = userService.login((String) request.getAttribute("username"), (String) request.getAttribute("password"));
+        LoginService loginService = new LoginServiceImpl();
+        Optional<User> userOptional = loginService.authenticate(request);
 
-            print.println("<p>Nombre del regalo: " + nombreRegalo + "</p>");
-            print.println("<p>Usuario: " + userOptional.get().getUsername() + "</p>");
+        String nombreRegalo = request.getParameter("regalo");
+        if (nombreRegalo != null && !nombreRegalo.isEmpty()) {
+            HttpSession session = request.getSession();
 
             Carta carta = (Carta) session.getAttribute("carta");
             try {
-                carta = cartaService.findCartaByUser(userOptional.get()).orElse(carta);
-                print.println("<p>Carta: " + carta.getIdCarta() + "</p>");
+                if (userOptional.isPresent()) {
+                    carta = cartaService.findCartaByUser(userOptional.get()).orElse(carta);
+                    Regalo regalo = new Regalo(nombreRegalo, carta.getIdCarta());
 
-                Regalo regalo = new Regalo(nombreRegalo,carta.getIdCarta());
-                print.println("<p>Regalo: " + regalo.getNombre() + "</p>");
-
-                if(cartaService.addRegaloToCarta(carta, regalo)){
-                    RequestDispatcher dispatcher = request.getRequestDispatcher("/IntroducirOK.html");
-                    try {
-                        dispatcher.include(request, response);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                } else {
-                    RequestDispatcher dispatcher = request.getRequestDispatcher("/IntroducirError.html");
-                    try {
-                        dispatcher.include(request, response);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
+                    if (cartaService.addRegaloToCarta(carta, regalo)) {
+                        session.setAttribute("carta", carta);
+                        RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/IntroducirOK.html");
+                        try {
+                            dispatcher.include(request, response);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    } else {
+                        RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/IntroducirError.html");
+                        try {
+                            dispatcher.include(request, response);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
             } catch (SQLException e) {
                 throw new ServiceJdbcException(e.getMessage(), e.getCause());
+            }
+
+        } else {
+            RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/IntroducirError.html");
+            try {
+                dispatcher.include(request, response);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
 
         }

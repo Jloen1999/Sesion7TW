@@ -1,24 +1,28 @@
 package es.unex.cum.tw.services;
 
+import es.unex.cum.tw.models.User;
+import es.unex.cum.tw.models.UserBuilder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
-import java.io.IOException;
-import java.util.Properties;
+import java.util.Optional;
 
 public class LoginServiceImpl implements LoginService {
-    Properties props = new Properties();
     @Override
-    public boolean authenticate(HttpServletRequest request) {
+    public Optional<User> authenticate(HttpServletRequest request) {
         HttpSession session = request.getSession();
-        try{
-            props.load(getClass().getClassLoader().getResourceAsStream("config.properties"));
-            String username = session.getAttribute("username") != null ? (String) session.getAttribute("username") : "";
-            String password = session.getAttribute("password") != null ? (String) session.getAttribute("password") : "";
-            return username.equals(props.getProperty("USERNAME")) && password.equals(props.getProperty("PASSWORD"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+
+        User user = (User) session.getAttribute("user");
+        String username = (String) session.getAttribute("username");
+        String password = (String) session.getAttribute("password");
+
+        if(user == null){
+            user = new UserBuilder()
+                    .setUsername(username)
+                    .setPassword(password)
+                    .build();
         }
 
+        return Optional.of(user);
     }
 }

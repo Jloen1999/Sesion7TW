@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS Cartas
 CREATE TABLE IF NOT EXISTS Regalos
 (
     id            INT AUTO_INCREMENT PRIMARY KEY,
+    cantidad      INT DEFAULT 1,
     id_carta      INT,
     FOREIGN KEY (id_carta) REFERENCES Cartas (id),
     nombre_regalo VARCHAR(100)

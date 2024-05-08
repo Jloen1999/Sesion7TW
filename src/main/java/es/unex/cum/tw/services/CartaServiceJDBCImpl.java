@@ -48,19 +48,20 @@ public class CartaServiceJDBCImpl implements CartaService{
         }
     }
 
+
     @Override
-    public boolean existsCartaByUser(User user) throws SQLException {
+    public void deleteRegalosFromCarta(List<String> idRegalos) throws SQLException {
         try{
-            return cartaRepository.existsCartaByUser(user);
+            cartaRepository.deleteRegalosFromCarta(idRegalos);
         } catch (SQLException e) {
             throw new ServiceJdbcException(e.getMessage(), e.getCause());
         }
     }
 
     @Override
-    public boolean existsRegaloByCarta(Carta carta) throws SQLException {
+    public boolean addCantidadToRegalo(int idRegalo, int cantidad) throws SQLException {
         try{
-            return cartaRepository.existsRegaloByCarta(carta);
+            return cartaRepository.addCantidadToRegalo(idRegalo, cantidad);
         } catch (SQLException e) {
             throw new ServiceJdbcException(e.getMessage(), e.getCause());
         }
