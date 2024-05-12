@@ -17,6 +17,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
+/**
+ * Servlet que gestiona la autenticación de los usuarios
+ * @author Jose Luis Obiang Ela Nanguang
+ * @version 1.0 12-05-2024, Sun, 22:31
+ */
 @WebServlet(
         name = "LoginServlet",
         value = "/login"
@@ -51,12 +56,12 @@ public class LoginServlet extends HttpServlet {
         password = request.getParameter("password");
 
         UserService service = new UserServiceJDBCImpl((Connection) request.getAttribute("con"));
-        Optional<User> userOptional = service.login(username, password);
+        Optional<User> userOptional = service.login(username, password); // Damos de alta al usuario en la base de datos
 
         try (PrintWriter print = response.getWriter()) {
             if (userOptional.isPresent()) {
                 HttpSession session = request.getSession();
-                session.setAttribute("user", userOptional.get());
+                session.setAttribute("user", userOptional.get()); // Guardamos el usuario en la sesión
 
                 if (username.equals(USERNAMEADMIN) && password.equals(PASSWORDADMIN)) {
 
@@ -64,7 +69,7 @@ public class LoginServlet extends HttpServlet {
                     List<User> users = service.findAll();
                     print.println("<div class=\"col-md-3 d-flex justify-content-end ms-6\">");
                     print.println("<img class=\"\" src=\"img/profile.svg\" alt=\"imagen de perfil del admin\" wi>");
-                    // Mostrar nombre username
+                    // Mostrar username
                     print.println("<p class=\"text-success\">" + userOptional.get().getUsername() + "</p>");
                     print.println("</div>");
 
@@ -74,7 +79,7 @@ public class LoginServlet extends HttpServlet {
 
                     print.println("<div class=\"col-md-3 d-flex justify-content-end ms-6\">");
                     print.println("<img class=\"\" src=\"img/profile.svg\" alt=\"imagen de perfil del admin\" wi>");
-                    // Mostrar nombre username
+                    // Mostrar username
                     print.println("<p class=\"text-success\">" + userOptional.get().getUsername() + "</p>");
                     print.println("</div>");
 
@@ -99,7 +104,7 @@ public class LoginServlet extends HttpServlet {
         }
     }
 
-        private static void mostrarUsuarios (PrintWriter print, List < User > users){
+        private static void mostrarUsuarios (PrintWriter print, List <User> users){
             print.println("<!doctype html>");
             print.println("<html lang=\"es\">");
             print.println("<head>");
@@ -137,7 +142,7 @@ public class LoginServlet extends HttpServlet {
             print.println("</section>");
             print.println("</div>");
 
-            print.println("<section class=\"container-md\">");
+            print.println("<form class=\"container-md\" action=\"/webapp-sesion7/usuario/eliminar\" method=\"post\">");
             print.println("<table class=\"table table-dark table-striped px-0\">");
             print.println("<thead>");
             print.println("<tr>");
@@ -149,6 +154,7 @@ public class LoginServlet extends HttpServlet {
             print.println("<th scope=\"col\">Username</th>");
             print.println("<th scope=\"col\">Password</th>");
             print.println("<th scope=\"col\">Mostrar Carta</th>");
+            print.println("<th scope=\"col\">Eliminar Usuario</th>");
             print.println("</tr>");
             print.println("</thead>");
             print.println("<tbody>");
@@ -161,11 +167,13 @@ public class LoginServlet extends HttpServlet {
                 print.println("<td>" + user.getUsername() + "</td>");
                 print.println("<td>" + user.getPassword() + "</td>");
                 print.println("<td><a class=\"text-decoration-none\" href=\"/webapp-sesion7/carta/listar?userId=" + user.getId() + "\">🧿</a></td>");
+                print.println("<td><input type=\"checkbox\" name=\"eliminarUsuarios\" value=\"" + user.getId() + "\"></td>");
                 print.println("</tr>");
             }
             print.println("</tbody>");
             print.println("</table>");
-            print.println("</section>");
+            print.println("<button type=\"submit\" class=\"btn btn-danger\">Eliminar</button>");
+            print.println("</form>");
 
             print.println("<footer class=\"row blog-footer d-flex justify-content-center align-content-center\">");
             print.println("<figure class=\"col-md-6 text-white text-center\">");
@@ -198,7 +206,7 @@ public class LoginServlet extends HttpServlet {
                         List<User> users = serviceJDBC.findAll();
                         print.println("<div class=\"col-md-3 d-flex justify-content-end ms-6\">");
                         print.println("<img class=\"\" src=\"img/profile.svg\" alt=\"imagen de perfil del admin\" wi>");
-                        // Mostrar nombre username
+                        // Mostrar username
                         print.println("<p class=\"text-success\">" + userOptional.get().getUsername() + "</p>");
                         print.println("</div>");
 
@@ -208,7 +216,7 @@ public class LoginServlet extends HttpServlet {
 
                         print.println("<div class=\"col-md-3 d-flex justify-content-end ms-6\">");
                         print.println("<img class=\"\" src=\"img/profile.svg\" alt=\"imagen de perfil del admin\" wi>");
-                        // Mostrar nombre username
+                        // Mostrar username
                         print.println("<p class=\"text-success\">" + userOptional.get().getUsername() + "</p>");
                         print.println("</div>");
 

@@ -11,6 +11,11 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * Filtro que se encarga de abrir y cerrar la conexión con la base de datos
+ * @author Jose Luis Obiang Ela Nanguang
+ * @version 1.0 12-05-2024, Sun, 22:35
+ */
 @WebFilter("/*")
 public class ConexionFilter implements Filter {
     @Override

@@ -19,6 +19,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
+
+/**
+ * Servlet que muestra la lista de regalos de un usuario y permite añadir nuevos regalos.
+ * @author Jose Luis Obiang Ela Nanguang
+ * @version 1.0 12-05-2024, Sun, 22:29
+ */
 @WebServlet(name = "ListarServlet", value = "/carta/listar")
 public class ListarServlet extends HttpServlet {
     private Properties props;
@@ -30,6 +36,7 @@ public class ListarServlet extends HttpServlet {
         super.init();
         props = new Properties();
         try {
+            // Obtenemos las credenciales del administrador del archivo config.properties
             props.load(getClass().getClassLoader().getResourceAsStream("config.properties"));
             USERNAMEADMIN = props.getProperty("USERNAME");
             PASSWORDADMIN = props.getProperty("PASSWORD");
@@ -45,7 +52,7 @@ public class ListarServlet extends HttpServlet {
         Optional<User> userOptional = userService.findById(Integer.parseInt(request.getParameter("userId")));
 
         LoginService loginService = new LoginServiceImpl();
-        Optional<User> userLogin = loginService.authenticate(request);
+        Optional<User> userLogin = loginService.authenticate(request); // Obtener el usuario de la sesión
 
         CartaService cartaService = new CartaServiceJDBCImpl((Connection) request.getAttribute("con"));
 
@@ -86,7 +93,7 @@ public class ListarServlet extends HttpServlet {
                 print.println("<header class=\"col-5\">");
                 print.println("<nav id=\"navbar-example3\" class=\"h-100 flex-column align-items-stretch pe-4 border-end\">");
                 print.println("<nav class=\"nav nav-pills flex-column\">");
-                if (userLogin.get().getUsername().equals(USERNAMEADMIN) && userLogin.get().getPassword().equals(PASSWORDADMIN)) {
+                if (userLogin.get().getUsername().equals(USERNAMEADMIN) && userLogin.get().getPassword().equals(PASSWORDADMIN)) { // Si el usuario es el administrador
                     print.println("<a class=\"nav-link\" href=\"/webapp-sesion7/login\" data-bs-toggle=\"tooltip\"");
                     print.println("data-bs-title=\"Página de administración\" data-bs-placement=\"left\">");
                     print.println("Admin");
@@ -166,9 +173,6 @@ public class ListarServlet extends HttpServlet {
 
 
             print.println("     <!-- Bootstrap JS -->");
-            //  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-            //        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-            //        crossorigin="anonymous"></script>
             print.println("     <script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js\"" +
                     "integrity=\"sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz\"" +
                     "crossorigin=\"anonymous\"></script>");

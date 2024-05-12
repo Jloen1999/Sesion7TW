@@ -159,8 +159,39 @@ public class UserRepositoryJDBCImpl implements UserRepository {
 
     @Override
     public boolean deleteById(int id) throws SQLException {
-        try (PreparedStatement statement = conn.prepareStatement("DELETE FROM usuarios WHERE id = ?")) {
-            statement.setLong(1, id);
+        if(selectCartaAndDeleteInRegalo(id)){
+            deleteUserInCarta(id);
+            try (PreparedStatement statement = conn.prepareStatement("DELETE FROM usuarios WHERE id = ?")) {
+                statement.setLong(1, id);
+                return statement.executeUpdate() > 0;
+            }
+        }
+
+        return false;
+    }
+
+    public void deleteUserInCarta(int idUser) throws SQLException {
+        try(PreparedStatement statement = conn.prepareStatement("DELETE FROM cartas WHERE id_usuario = ?")){
+            statement.setLong(1, idUser);
+            statement.executeUpdate();
+        }
+    }
+
+    public boolean selectCartaAndDeleteInRegalo(int idUser) throws SQLException {
+        try(PreparedStatement statement = conn.prepareStatement("SELECT id from cartas where id_usuario = ?")){
+            statement.setLong(1, idUser);
+            ResultSet rs = statement.executeQuery();
+            if(rs.next()){
+                return deleteCartaInRegalo(rs.getInt("id"));
+            }
+        }
+
+        return false;
+    }
+
+    public boolean deleteCartaInRegalo(int idCarta) throws SQLException {
+        try(PreparedStatement statement = conn.prepareStatement("DELETE FROM regalos WHERE id_carta = ?")){
+            statement.setLong(1, idCarta);
             return statement.executeUpdate() > 0;
         }
     }

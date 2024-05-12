@@ -11,7 +11,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
 
-@WebFilter("/carta/*")
+/**
+ * Filtro que se encarga de comprobar si el usuario ha iniciado sesión
+ * @author Jose Luis Obiang Ela Nanguang
+ * @version 1.0 12-05-2024, Sun, 22:34
+ */
+@WebFilter({"/carta/*", "/usuario/*"})
 public class LoginFiltro implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {

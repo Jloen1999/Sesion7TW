@@ -12,11 +12,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
 
+/**
+ * Servlet que añade un regalo a la carta de un usuario.
+ * @author Jose Luis Obiang Ela Nanguang
+ * @version 1.0 12-05-2024, Sun, 22:26
+ */
 @WebServlet(
         name = "AnadirRegalo",
         value = "/carta/anadir"
@@ -32,19 +36,19 @@ public class AnadirRegaloServlet extends HttpServlet {
         UserService userService = new UserServiceJDBCImpl(conn);
 
         LoginService loginService = new LoginServiceImpl();
-        Optional<User> userOptional = loginService.authenticate(request);
+        Optional<User> userOptional = loginService.authenticate(request); // Obtener usuario de la sesión
 
-        String nombreRegalo = request.getParameter("regalo");
-        if (nombreRegalo != null && !nombreRegalo.isEmpty()) {
+        String nombreRegalo = request.getParameter("regalo"); // Obtener nombre del regalo
+        if (nombreRegalo != null && !nombreRegalo.isEmpty()) { // Si el nombre del regalo no es nulo ni vacío
             HttpSession session = request.getSession();
 
             Carta carta = (Carta) session.getAttribute("carta");
             try {
                 if (userOptional.isPresent()) {
-                    carta = cartaService.findCartaByUser(userOptional.get()).orElse(carta);
+                    carta = cartaService.findCartaByUser(userOptional.get()).orElse(carta); // Obtener carta del usuario
                     Regalo regalo = new Regalo(nombreRegalo, carta.getIdCarta());
 
-                    if (cartaService.addRegaloToCarta(carta, regalo)) {
+                    if (cartaService.addRegaloToCarta(carta, regalo)) { // Añadir regalo a la carta
                         session.setAttribute("carta", carta);
                         RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/IntroducirOK.html");
                         try {

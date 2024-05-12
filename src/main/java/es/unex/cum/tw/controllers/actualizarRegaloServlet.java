@@ -3,7 +3,6 @@ package es.unex.cum.tw.controllers;
 import es.unex.cum.tw.models.Carta;
 import es.unex.cum.tw.services.CartaService;
 import es.unex.cum.tw.services.CartaServiceJDBCImpl;
-import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -19,6 +18,13 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 
+
+/**
+ * Servlet que se encarga de eliminar regalos de la carta de un usuario.
+ * También se encarga de actualizar las cantidades de los regalos.
+ * @author Jose Luis Obiang Ela Nanguang
+ * @version 1.0 12-05-2024, Sun, 22:20
+ */
 @WebServlet(
         name = "eliminarRegalo",
         value = "/carta/actualizar"
@@ -49,9 +55,9 @@ public class actualizarRegaloServlet extends HttpServlet {
             print.println(" </head>");
             print.println("<body>");
 
-            Carta carta = (Carta) session.getAttribute("carta");
+            Carta carta = (Carta) session.getAttribute("carta"); // Obtenemos la carta del usuario de la sesión
 
-            if (carta != null) {
+            if (carta != null) { // Si la carta no es nula, eliminamos los regalos y actualizamos las cantidades de los regalos en caso de que se haya modificado
                 eliminarRegalo(req, cartaService);
                 updateCantidades(req, cartaService);
 
@@ -69,6 +75,11 @@ public class actualizarRegaloServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Método que elimina los regalos de la carta de un usuario.
+     * @param request Petición HTTP
+     * @param cartaService Servicio de la carta
+     */
     private static void eliminarRegalo(HttpServletRequest request, CartaService cartaService) {
         String[] deleteIds = request.getParameterValues("regalosAEliminar");
 
@@ -82,6 +93,11 @@ public class actualizarRegaloServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Método que actualiza las cantidades de los regalos de la carta de un usuario.
+     * @param request Petición HTTP
+     * @param cartaService Servicio de la carta
+     */
     private void updateCantidades(HttpServletRequest request, CartaService cartaService) {
 
         Enumeration<String> enumer = request.getParameterNames();
